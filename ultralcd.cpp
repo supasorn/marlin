@@ -1168,6 +1168,59 @@ void kill_screen(const char* lcd_msg) {
 
   #endif  // MANUAL_BED_LEVELING
 
+
+  int bedCalibPoint = 0;
+
+  static void lcd_bed_calib();
+
+  static void _lcd_bed_calib_goto(int p) {
+    int x[4] = {0, 180, 180, 0};
+    int y[4] = {20, 20, 190, 190};
+    current_position[Z_AXIS] = 3;
+    line_to_current(Z_AXIS);
+    current_position[X_AXIS] = x[p];
+    current_position[Y_AXIS] = y[p];
+    line_to_current(manual_feedrate_mm_m[X_AXIS] <= manual_feedrate_mm_m[Y_AXIS] ? X_AXIS : Y_AXIS);
+    current_position[Z_AXIS] = 0;
+    line_to_current(Z_AXIS);
+  }
+
+  static void _lcd_bed_calib_next() {
+    _lcd_bed_calib_goto(bedCalibPoint);
+    lcd_goto_previous_menu(true);
+    bedCalibPoint = (bedCalibPoint + 1) % 4;
+  }
+
+  static void _lcd_bed_calib_1() {
+    _lcd_bed_calib_goto(0);
+    lcd_goto_previous_menu(true);
+  }
+
+  static void _lcd_bed_calib_2() {
+    _lcd_bed_calib_goto(1);
+    lcd_goto_previous_menu(true);
+  }
+
+  static void _lcd_bed_calib_3() {
+    _lcd_bed_calib_goto(2);
+    lcd_goto_previous_menu(true);
+  }
+
+  static void _lcd_bed_calib_4() {
+    _lcd_bed_calib_goto(3);
+    lcd_goto_previous_menu(true);
+  }
+
+  static void lcd_bed_calib() {
+    START_MENU();
+    MENU_ITEM(back, "Cancel");
+    MENU_ITEM(submenu, "Next", _lcd_bed_calib_next);
+    MENU_ITEM(submenu, "1", _lcd_bed_calib_1);
+    MENU_ITEM(submenu, "2", _lcd_bed_calib_2);
+    MENU_ITEM(submenu, "3", _lcd_bed_calib_3);
+    MENU_ITEM(submenu, "4", _lcd_bed_calib_4);
+    END_MENU();
+  }
   /**
    *
    * "Prepare" submenu
@@ -1197,6 +1250,9 @@ void kill_screen(const char* lcd_msg) {
     //
     MENU_ITEM(function, MSG_SET_HOME_OFFSETS, lcd_set_home_offsets);
     //MENU_ITEM(gcode, MSG_SET_ORIGIN, PSTR("G92 X0 Y0 Z0"));
+
+    // Manual Bed Calibration    
+    MENU_ITEM(submenu, "Bed Calib :)", lcd_bed_calib);
 
     //
     // Level Bed
