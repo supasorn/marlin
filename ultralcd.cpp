@@ -1174,7 +1174,7 @@ void kill_screen(const char* lcd_msg) {
   static void lcd_bed_calib();
 
   static void _lcd_bed_calib_goto(int p) {
-    int x[4] = {0, 180, 180, 0};
+    int x[4] = {0, 170, 170, 0};
     int y[4] = {20, 20, 190, 190};
     current_position[Z_AXIS] = 3;
     line_to_current(Z_AXIS);
