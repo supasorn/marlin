@@ -1185,30 +1185,30 @@ void kill_screen(const char* lcd_msg) {
     line_to_current(Z_AXIS);
   }
 
-  static void _lcd_bed_calib_next() {
-    _lcd_bed_calib_goto(bedCalibPoint);
+  static void _lcd_bed_calib(int n) {
+    _lcd_bed_calib_goto(n);
+    bedCalibPoint = (n + 1) % 4;
     lcd_goto_previous_menu(true);
-    bedCalibPoint = (bedCalibPoint + 1) % 4;
+  }
+
+  static void _lcd_bed_calib_next() {
+    _lcd_bed_calib(bedCalibPoint);
   }
 
   static void _lcd_bed_calib_1() {
-    _lcd_bed_calib_goto(0);
-    lcd_goto_previous_menu(true);
+    _lcd_bed_calib(0);
   }
 
   static void _lcd_bed_calib_2() {
-    _lcd_bed_calib_goto(1);
-    lcd_goto_previous_menu(true);
+    _lcd_bed_calib(1);
   }
 
   static void _lcd_bed_calib_3() {
-    _lcd_bed_calib_goto(2);
-    lcd_goto_previous_menu(true);
+    _lcd_bed_calib(2);
   }
 
   static void _lcd_bed_calib_4() {
-    _lcd_bed_calib_goto(3);
-    lcd_goto_previous_menu(true);
+    _lcd_bed_calib(3);
   }
 
   static void lcd_bed_calib() {
