@@ -1180,7 +1180,8 @@ void kill_screen(const char* lcd_msg) {
     line_to_current(Z_AXIS);
     current_position[X_AXIS] = x[p];
     current_position[Y_AXIS] = y[p];
-    line_to_current(manual_feedrate_mm_m[X_AXIS] <= manual_feedrate_mm_m[Y_AXIS] ? X_AXIS : Y_AXIS);
+    //line_to_current(manual_feedrate_mm_m[X_AXIS] <= manual_feedrate_mm_m[Y_AXIS] ? X_AXIS : Y_AXIS);
+    planner.buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], MMM_TO_MMS(manual_feedrate_mm_m[X_AXIS] * 3), active_extruder);
     current_position[Z_AXIS] = 0;
     line_to_current(Z_AXIS);
   }
