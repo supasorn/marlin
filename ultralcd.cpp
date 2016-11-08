@@ -1174,16 +1174,13 @@ void kill_screen(const char* lcd_msg) {
   static void lcd_bed_calib();
 
   static void _lcd_bed_calib_goto(int p) {
-    int x[4] = {0, 170, 170, 0};
-    int y[4] = {20, 20, 190, 190};
-    current_position[Z_AXIS] = 3;
-    line_to_current(Z_AXIS);
-    current_position[X_AXIS] = x[p];
-    current_position[Y_AXIS] = y[p];
-    //line_to_current(manual_feedrate_mm_m[X_AXIS] <= manual_feedrate_mm_m[Y_AXIS] ? X_AXIS : Y_AXIS);
-    planner.buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], MMM_TO_MMS(manual_feedrate_mm_m[X_AXIS] * 3), active_extruder);
-    current_position[Z_AXIS] = 0;
-    line_to_current(Z_AXIS);
+    int x[4] = {0, 170};  // MinX, MaxX
+    int y[4] = {20, 190}; // MinY, MaxY
+    char cmd[24];
+    enqueue_and_echo_commands_P(PSTR("G0 Z3"));
+    sprintf_P(cmd, PSTR("G0 F8000 X%i Y%i"), x[p == 1 || p == 2], y[p / 2]);
+    enqueue_and_echo_command(cmd);
+    enqueue_and_echo_commands_P(PSTR("G0 Z0"));
   }
 
   static void _lcd_bed_calib(int n) {
@@ -1214,12 +1211,18 @@ void kill_screen(const char* lcd_msg) {
 
   static void lcd_bed_calib() {
     START_MENU();
-    MENU_ITEM(back, "Cancel");
-    MENU_ITEM(submenu, "Next", _lcd_bed_calib_next);
-    MENU_ITEM(submenu, "1", _lcd_bed_calib_1);
-    MENU_ITEM(submenu, "2", _lcd_bed_calib_2);
-    MENU_ITEM(submenu, "3", _lcd_bed_calib_3);
-    MENU_ITEM(submenu, "4", _lcd_bed_calib_4);
+    
+    _skipStatic = false;
+    _MENU_ITEM_PART_1(back, MSG_PREPARE);
+    enqueue_and_echo_commands_P(PSTR("G0 Z5")); // Raising the hotend to prevent burning the bed.
+    _MENU_ITEM_PART_2(back);
+    
+    MENU_ITEM(gcode,   "Auto Home", PSTR("G28"));
+    MENU_ITEM(submenu, " > Next Spot", _lcd_bed_calib_next);
+    MENU_ITEM(submenu, " > 1. OO", _lcd_bed_calib_1);
+    MENU_ITEM(submenu, " > 2. XO", _lcd_bed_calib_2);
+    MENU_ITEM(submenu, " > 3. XY", _lcd_bed_calib_3);
+    MENU_ITEM(submenu, " > 4. OY", _lcd_bed_calib_4);
     END_MENU();
   }
   /**
@@ -1246,14 +1249,14 @@ void kill_screen(const char* lcd_msg) {
       MENU_ITEM(gcode, MSG_AUTO_HOME_Z, PSTR("G28 Z"));
     #endif
 
+    // Manual Bed Calibration    
+    MENU_ITEM(submenu, "Bed Calib Tool", lcd_bed_calib);
+
     //
     // Set Home Offsets
     //
     MENU_ITEM(function, MSG_SET_HOME_OFFSETS, lcd_set_home_offsets);
     //MENU_ITEM(gcode, MSG_SET_ORIGIN, PSTR("G92 X0 Y0 Z0"));
-
-    // Manual Bed Calibration    
-    MENU_ITEM(submenu, "Bed Calib :)", lcd_bed_calib);
 
     //
     // Level Bed
