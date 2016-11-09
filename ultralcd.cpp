@@ -1177,7 +1177,7 @@ void kill_screen(const char* lcd_msg) {
     int x[4] = {0, 170};  // MinX, MaxX
     int y[4] = {20, 190}; // MinY, MaxY
     char cmd[24];
-    enqueue_and_echo_commands_P(PSTR("G0 Z3"));
+    enqueue_and_echo_commands_P(PSTR("G0 Z2"));
     sprintf_P(cmd, PSTR("G0 F8000 X%i Y%i"), x[p == 1 || p == 2], y[p / 2]);
     enqueue_and_echo_command(cmd);
     enqueue_and_echo_commands_P(PSTR("G0 Z0"));
@@ -1223,6 +1223,7 @@ void kill_screen(const char* lcd_msg) {
     MENU_ITEM(submenu, " > 2. XO", _lcd_bed_calib_2);
     MENU_ITEM(submenu, " > 3. XY", _lcd_bed_calib_3);
     MENU_ITEM(submenu, " > 4. OY", _lcd_bed_calib_4);
+    MENU_ITEM(gcode, "Raise Hotend", PSTR("G0 Z10"));
     END_MENU();
   }
   /**
