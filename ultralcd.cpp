@@ -101,6 +101,7 @@ uint8_t lcdDrawUpdate = LCDVIEW_CLEAR_CALL_REDRAW; // Set when the LCD needs to 
   static void lcd_main_menu();
   static void lcd_tune_menu();
   static void lcd_prepare_menu();
+  static void lcd_quick_access();
   static void lcd_move_menu();
   static void lcd_control_menu();
   static void lcd_control_temperature_menu();
@@ -589,6 +590,7 @@ void kill_screen(const char* lcd_msg) {
       MENU_ITEM(submenu, MSG_TUNE, lcd_tune_menu);
     }
     else {
+      MENU_ITEM(submenu, "Quick Access", lcd_quick_access);
       MENU_ITEM(submenu, MSG_PREPARE, lcd_prepare_menu);
       #if ENABLED(DELTA_CALIBRATION_MENU)
         MENU_ITEM(submenu, MSG_DELTA_CALIBRATE, lcd_delta_calibrate_menu);
@@ -1184,6 +1186,7 @@ void kill_screen(const char* lcd_msg) {
   }
 
   static void _lcd_bed_calib(int n) {
+    
     _lcd_bed_calib_goto(n);
     bedCalibPoint = (n + 1) % 4;
     lcd_goto_previous_menu(true);
@@ -1226,6 +1229,30 @@ void kill_screen(const char* lcd_msg) {
     MENU_ITEM(gcode, "Raise Hotend", PSTR("G0 Z10"));
     END_MENU();
   }
+
+  static void heat200() {
+    thermalManager.setTargetHotend(200, 0);
+    lcd_return_to_status();
+  }
+
+  static void lcd_quick_access() {
+    START_MENU();
+    
+    _skipStatic = false;
+    _MENU_ITEM_PART_1(back, MSG_PREPARE);
+    enqueue_and_echo_commands_P(PSTR("G0 Z5")); // Raising the hotend to prevent burning the bed.
+    _MENU_ITEM_PART_2(back);
+
+    // Manual Bed Calibration    
+    MENU_ITEM(submenu, "Bed Calib Tool", lcd_bed_calib);
+
+    MENU_ITEM(gcode, "Raise Hotend", PSTR("G91\nG0 X0Y0Z10\nG90"));
+    MENU_ITEM(function, "Heat 200", heat200);
+    MENU_ITEM(function, "Cool Down", lcd_cooldown);
+
+ 
+    END_MENU();
+  }
   /**
    *
    * "Prepare" submenu
@@ -1249,9 +1276,6 @@ void kill_screen(const char* lcd_msg) {
       MENU_ITEM(gcode, MSG_AUTO_HOME_Y, PSTR("G28 Y"));
       MENU_ITEM(gcode, MSG_AUTO_HOME_Z, PSTR("G28 Z"));
     #endif
-
-    // Manual Bed Calibration    
-    MENU_ITEM(submenu, "Bed Calib Tool", lcd_bed_calib);
 
     //
     // Set Home Offsets
